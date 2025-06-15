@@ -46,7 +46,7 @@ export const List = ({ initialCars, totalItems }: Props) => {
         px: 0,
       }}
     >
-      <Box sx={{ mb: 3, px: 2 }}>
+      <Box sx={{ mb: 3, px: 2, display: 'flex', justifyContent: 'center' }}>
         <SortSelect onSortChangeAction={handleSortChange} />
       </Box>
 

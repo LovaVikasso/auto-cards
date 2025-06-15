@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Box,
   Button,
@@ -6,72 +8,87 @@ import {
   Chip,
   Stack,
   Typography,
-  Skeleton,
 } from '@mui/material';
 import { Car } from '@/types';
-import Image from 'next/image';
-import { useState } from 'react';
+import { useCallback, useState, memo } from 'react';
 import { CarDetails } from '@/components/CarDetails';
+import { ImageCarousel } from './ImageCarousel';
 
 interface Props {
   car: Car;
 }
 
-export const CardItem = ({ car }: Props) => {
-  const [open, setOpen] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true);
+const formatPrice = (price: number) => price.toLocaleString('ru-RU');
+const formatRun = (run: number) => run.toLocaleString('ru-RU');
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+const CarInfo = memo(({ car }: { car: Car }) => (
+  <Box sx={{ mb: 2 }}>
+    <Typography variant="body2" color="text.secondary">
+      Двигатель:{' '}
+      <Box component="span" sx={{ color: 'text.primary' }}>
+        {car.engine_volume}cc, {car.engine_power}
+      </Box>
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      Цвет:{' '}
+      <Box component="span" sx={{ color: 'text.primary' }}>
+        {car.color}
+      </Box>
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      Состояние:{' '}
+      <Box component="span" sx={{ color: 'text.primary' }}>
+        {car.state}
+      </Box>
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      Владельцев:{' '}
+      <Box component="span" sx={{ color: 'text.primary' }}>
+        {car.owners_number}
+      </Box>
+    </Typography>
+  </Box>
+));
+
+CarInfo.displayName = 'CarInfo';
+
+export const CardItem = memo(({ car }: Props) => {
+  const handleOpen = useCallback(() => setOpen(true), []);
+  const handleClose = useCallback(() => setOpen(false), []);
+  const [open, setOpen] = useState(false);
+
+  const carTitle = `${car.mark_cyrillic_name} ${car.model_cyrillic_name}`;
+  const hasImages = car.images?.image?.length > 0;
 
   return (
     <>
-      <Card sx={{ height: '100%' }}>
+      <Card
+        sx={{ height: '100%' }}
+        variant="outlined"
+        role="article"
+        aria-label={`Карточка автомобиля ${carTitle}`}
+      >
         <CardContent>
-          {car.images && car.images.image.length > 0 && (
-            <Box
-              sx={{
-                mb: 2,
-                position: 'relative',
-                width: '100%',
-                height: { xs: '200px', sm: '250px', md: '300px' },
-                backgroundColor: 'grey.100',
-                borderRadius: '4px',
-                overflow: 'hidden',
-              }}
-            >
-              {imageLoading && (
-                <Skeleton
-                  variant="rectangular"
-                  width="100%"
-                  height="100%"
-                  animation="wave"
-                />
-              )}
-              <Image
-                src={car.images.image[0]}
-                alt={`${car.mark_cyrillic_name} ${car.model_cyrillic_name}`}
-                fill
-                sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                style={{
-                  objectFit: 'cover',
-                  borderRadius: '4px',
-                  opacity: imageLoading ? 0 : 1,
-                  transition: 'opacity 0.3s ease-in-out',
-                }}
-                onLoadingComplete={() => setImageLoading(false)}
-                priority
-              />
-            </Box>
+          {hasImages && (
+            <ImageCarousel images={car.images.image} alt={carTitle} />
           )}
 
-          <Typography variant="h5" component="div" gutterBottom>
-            {car.mark_cyrillic_name} {car.model_cyrillic_name}
+          <Typography
+            variant="h5"
+            component="h2"
+            gutterBottom
+            aria-label="Название автомобиля"
+          >
+            {carTitle}
           </Typography>
 
           <Box sx={{ mb: 2 }}>
-            <Typography variant="h6" color="primary">
-              {car.price.toLocaleString('ru-RU')} ₽
+            <Typography
+              variant="h6"
+              color="primary"
+              aria-label={`Цена: ${formatPrice(car.price)} рублей`}
+            >
+              {formatPrice(car.price)} ₽
             </Typography>
           </Box>
 
@@ -79,31 +96,31 @@ export const CardItem = ({ car }: Props) => {
             direction="row"
             spacing={1}
             sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}
+            role="list"
+            aria-label="Характеристики автомобиля"
           >
-            <Chip label={`${car.year} год`} size="small" disabled />
             <Chip
-              label={`${car.run.toLocaleString()} км`}
+              label={`${car.year} год`}
               size="small"
               disabled
+              role="listitem"
             />
-            <Chip label={car.gearbox} size="small" disabled />
+            <Chip
+              label={`${formatRun(car.run)} км`}
+              size="small"
+              disabled
+              role="listitem"
+            />
+            <Chip label={car.gearbox} size="small" disabled role="listitem" />
           </Stack>
 
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Двигатель: {car.engine_volume}cc, {car.engine_power}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Цвет: {car.color}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Состояние: {car.state}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Владельцев: {car.owners_number}
-            </Typography>
-          </Box>
-          <Button variant="outlined" onClick={handleOpen}>
+          <CarInfo car={car} />
+
+          <Button
+            variant="outlined"
+            onClick={handleOpen}
+            aria-label="Открыть подробную информацию"
+          >
             Подробнее
           </Button>
         </CardContent>
@@ -112,4 +129,6 @@ export const CardItem = ({ car }: Props) => {
       <CarDetails car={car} open={open} onClose={handleClose} />
     </>
   );
-};
+});
+
+CardItem.displayName = 'CardItem';

@@ -32,10 +32,10 @@ export const carsApi = {
       params.append('_sort', sort);
       params.append('_order', order === SORT_ORDERS.NONE ? '' : order || 'asc');
     }
-    console.log('URL Parameters:', params.toString());
-    const url = `https://testing-api.ru-rating.ru/cars?${params.toString()}`;
-    console.log('Complete URL:', url);
-    const response = await fetch(url);
+
+    const response = await fetch(
+      `https://testing-api.ru-rating.ru/cars?${params.toString()}`
+    );
 
     if (!response.ok) {
       throw new Error('Failed to fetch cars');

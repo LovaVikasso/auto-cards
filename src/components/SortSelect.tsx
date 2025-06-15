@@ -7,21 +7,40 @@ import {
   Select,
   SelectChangeEvent,
 } from '@mui/material';
-import { SortOrder } from '@/api/constants';
-import { useState } from 'react';
+import { SortOrder, SORT_ORDERS } from '@/api/constants';
+import { useCallback, useMemo, useState } from 'react';
 
 interface Props {
   onSortChangeAction: (order: SortOrder) => void;
 }
 
-export const SortSelect = ({ onSortChangeAction }: Props) => {
-  const [sortOrder, setSortOrder] = useState<SortOrder>('none');
+const SORT_OPTIONS = [
+  { value: SORT_ORDERS.NONE, label: 'Без сортировки' },
+  { value: SORT_ORDERS.ASC, label: 'По возрастанию' },
+  { value: SORT_ORDERS.DESC, label: 'По убыванию' },
+] as const;
 
-  const handleChange = (event: SelectChangeEvent) => {
-    const value = event.target.value as SortOrder;
-    setSortOrder(value);
-    onSortChangeAction(value);
-  };
+export const SortSelect = ({ onSortChangeAction }: Props) => {
+  const [sortOrder, setSortOrder] = useState<SortOrder>(SORT_ORDERS.NONE);
+
+  const handleChange = useCallback(
+    (event: SelectChangeEvent<SortOrder>) => {
+      const value = event.target.value as SortOrder;
+      setSortOrder(value);
+      onSortChangeAction(value);
+    },
+    [onSortChangeAction]
+  );
+
+  const menuItems = useMemo(
+    () =>
+      SORT_OPTIONS.map(({ value, label }) => (
+        <MenuItem key={value} value={value}>
+          {label}
+        </MenuItem>
+      )),
+    []
+  );
 
   return (
     <FormControl
@@ -30,6 +49,7 @@ export const SortSelect = ({ onSortChangeAction }: Props) => {
         backgroundColor: 'background.paper',
         borderRadius: 1,
       }}
+      aria-label="Выберите порядок сортировки"
     >
       <InputLabel id="sort-select-label">Сортировка</InputLabel>
       <Select
@@ -38,10 +58,9 @@ export const SortSelect = ({ onSortChangeAction }: Props) => {
         label="Сортировка"
         value={sortOrder}
         onChange={handleChange}
+        aria-describedby="sort-select-description"
       >
-        <MenuItem value="none">Без сортировки</MenuItem>
-        <MenuItem value="asc">По возрастанию</MenuItem>
-        <MenuItem value="desc">По убыванию</MenuItem>
+        {menuItems}
       </Select>
     </FormControl>
   );
