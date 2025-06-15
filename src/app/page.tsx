@@ -1,9 +1,15 @@
-import styles from './page.module.css';
+import { carsApi } from '@/api/cars';
+import { Container } from '@mui/material';
+import { List } from '@/components/List';
 
-export default function Home() {
+export default async function Home() {
+  const data = await carsApi.getCars();
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}></main>
-    </div>
+    <Container maxWidth="xl">
+      <main>
+        <List initialCars={data.data} totalItems={data.total} />
+      </main>
+    </Container>
   );
 }
