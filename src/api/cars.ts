@@ -4,12 +4,7 @@ import {
   SortOrder,
   SORT_ORDERS,
 } from './constants';
-import { Car } from '@/types';
-
-export interface CarResponse {
-  data: Car[];
-  total: number;
-}
+import { CarResponse } from '@/types/api';
 
 interface GetCarsParams {
   page?: number;
